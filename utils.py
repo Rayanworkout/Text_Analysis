@@ -18,25 +18,38 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import silhouette_score
 from unidecode import unidecode
 from wordcloud import WordCloud
-    
+
 
 def download_file_with_url(company_name, url):
-    if not re.match(r"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", url):
+    if not re.match(r"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", url) or not url[-4:] == ".pdf":
         return "⚠️ This is not a valid URL, try again.", False
+    
+    company_name = company_name.replace(" ", "_").lower()
+
+    files_we_have = [file.split(".pdf")[0].lower() for file in os.listdir("files/DEU")]
+
+    if company_name in files_we_have:
+        return "⚠️ This company is already in the list.", False
+
+    for word in files_we_have:
+        count = 0
+        for letter in zip(word, company_name):
+            if letter[0] == letter[1]:
+                count += 1
+
+        if count > len(company_name) / 2:
+            return "⚠️ This company is already in the list.", False
+    
     try:
-        with open(f"files/DEU/{company_name}.pdf", "wb") as file:
-            file.write(requests.get(url).content)
-        
-        with requests.get(url, stream=True) as r, open(f"files/DEU/{company_name}.pdf", 'wb') as f:
-            for chunk in r.iter_content(chunk_size=1024):
-                # writing one chunk at a time to a file
-                if chunk:
-                    f.write(chunk)
+        r = requests.get(url)
+
+        with open(f"files/DEU/{company_name}.pdf", "wb") as f:
+            f.write(r.content)
+            
     except Exception:
         return "Could not download this page. The URL might be invalid.", False
     
-    return f'Download Successful ✅', True
-
+    return f'Download Successful ✅\n\nYou can now select {company_name} in the list.', True
 
 def get_text_from_pdf(filename, start_page, end_page):
     pdf_file = fitz.open(f"files/DEU/{filename}")
@@ -96,6 +109,27 @@ def return_tokens_by_word(nlp, stop_words, sentence: str):
             and not word.lemma_.isdigit()
             and word.lemma_ not in stop_words))
 
+
+def generate_wordcloud(text=None, stop_words=None, max_words=200, from_keywords=False, keywords=None):
+    
+    file = f'files/masks/{random.choice(os.listdir("files/masks"))}'
+    mask = np.array(Image.open(file))
+    
+    wc = WordCloud(
+        background_color='black',
+        height=1000,
+        width=1000,
+        max_words=max_words,
+        stopwords=stop_words,
+        mask=mask,
+        colormap='rainbow'
+    )
+    
+    if not from_keywords:
+        wc.generate(text.lower()).to_file(f"files/wordcloud.png")
+        return
+
+    wc.generate_from_frequencies(keywords).to_file(f"files/wordcloud_from_yake.png")
 
 def extract_keywords(n, top, all_data, lang='fr'):
     kw_extractor = yake.KeywordExtractor(lan=lang, n=n, dedupLim=0.9, top=top)
@@ -207,20 +241,3 @@ def bigrams_trigrams(gensim_data):
     
     return data_bigrams, data_bigrams_trigrams, bigrams_and_trigrams
 
-
-def generate_wordcloud(text, stop_words, max_words=200):
-    
-    file = f'files/masks/{random.choice(os.listdir("files/masks"))}'
-    mask = np.array(Image.open(file))
-    
-    wc = WordCloud(
-        background_color='black',
-        height=1000,
-        width=1000,
-        max_words=max_words,
-        stopwords=stop_words,
-        mask=mask,
-        colormap='rainbow'
-    )
-    
-    wc.generate(text.lower()).to_file(f"files/wordcloud.png")

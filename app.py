@@ -13,7 +13,24 @@ from streamlit import components
 
 from utils import *
 
-# TODO CORRECT DOCS + REVOIR DOWNLOAD FUNCTION + CLUSTERING
+# TODO AFFINN
+
+# SETTING PAGE CONFIG AND THEME
+
+favicon = Image.open("files/favicon.webp")
+
+st.set_page_config(
+    layout="wide", page_icon=favicon, page_title="Topic Modeling App"
+)
+
+hide_default_format = """
+       <style>
+       #MainMenu {visibility: hidden; }
+       footer {visibility: hidden;}
+       </style>
+       """
+st.markdown(hide_default_format, unsafe_allow_html=True)
+
 
 @st.cache(show_spinner=False)
 def get_clusters_cached(df, k):
@@ -31,7 +48,7 @@ def get_parameters(choices=["full_analysis_choice"]):
     necessary_parameters = {
         "full_analysis_choice" : ["keywords_qty", "n", "wordcloud_number", "user_k", "top_keywords_number", "topics_number"],
         "wordcloud_choice" : ["wordcloud_number"],
-        "keywords_choice" : ["keywords_qty", "n"],
+        "keywords_choice" : ["keywords_qty", "n", "wordcloud_number"],
         "clusters_choice": ["user_k", "top_keywords_number", "n", "keywords_qty"],
         "topics_choice": ["topics_number"]
     }
@@ -174,25 +191,24 @@ def run_analysis(text):
                 if not data:
                     st.write("# No keywords found, try again with a bigger sample ❌")
                     return
-            
-            with st.spinner("📊 Generating Chart ..."):
-                # PLOTTING KEYWORDS
-                df = pd.DataFrame(data, columns=["ngram", "score"])
                 
-                fig = plt.figure(figsize=(12, 35))
-                plt.rcParams.update({'font.size': 25})
-                plt.tick_params(axis='both', which='major', pad=15)
+                col1, col2 = st.columns(2)
+                with col1:
+                    # CREATE WORDCLOUD FROM YAKE KEYWORDS
+                    
+                    # Here I substract 1 to the score otherwise wordcloud will show the least relevant keyword first
+                    generate_wordcloud(stop_words, parameters["wordcloud_number"],
+                                       from_keywords=True,
+                                       keywords={word: 1.0 - score for word, score in data})
+                    
+                    st.header("☁️ WordCloud created from Yake | \n")
+                    st.image("files/wordcloud_from_yake.png")
                 
-                plt.barh(df.ngram, df.score, 0.5, color='#1DA1F2')
-                plt.grid(True, color='grey', linewidth=0.6, alpha=0.9)
-                                
-                plt.xticks([])
-                
-                st.header("📊 Most represented Keywords\n"
-                        " **(The smaller the bar, the more relevant the keyword is)**\n\n")
-                
-                st.pyplot(plt)
-                
+                with col2:
+                    st.header(" 🐼 Scores\n")
+                    keywords_df = pd.DataFrame(data, columns=["Keywords", "score"]).sort_values(by="score", ascending=True)
+                    st.dataframe(keywords_df)
+                                    
         
         if "full_analysis_choice" in user_choices or "clusters_choice" in user_choices:
             with st.spinner("🌀 Extracting Keywords ..."):

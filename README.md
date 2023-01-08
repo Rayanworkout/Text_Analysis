@@ -38,7 +38,8 @@ and apply some basic Topic Modeling to it. The model extracts keywords, create c
 ***The model will extract the main topics of the document with LDA method. You can choose the number of topics you want to extract.***
 
 # Understanding Output
-***The horizontal bar chart displays the most represented keywords in the document. You can then guess the main topics and the themes associated. You can refer to Yake documentation to understand how these keywords are chosen. https://github.com/LIAAD/yake***
+
+***The first elements displayed are Wordclouds. A Wordcloud is a visual representation of the most frequent words in the document. The program will generate 2, one with the wordcloud library classification and the other using the Yake library. You can then guess the main topics and the themes associated. You can refer to Yake documentation to understand how these keywords are chosen. https://github.com/LIAAD/yake***
 
 ***- After the keywords extraction, we create clusters from the previously extracted N-Grams.***
 
@@ -77,4 +78,4 @@ and apply some basic Topic Modeling to it. The model extracts keywords, create c
 
 ***Source code***
 
-*https://github.com/Rayanworkout/natural_language_processing*
+*https://github.com/Rayanworkout/text_analysis*
