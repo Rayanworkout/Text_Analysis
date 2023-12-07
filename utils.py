@@ -26,7 +26,7 @@ def download_file_with_url(company_name, url):
     
     company_name = company_name.replace(" ", "_").lower()
 
-    files_we_have = [file.split(".pdf")[0].lower() for file in os.listdir("files/DEU")]
+    files_we_have = [file.split(".pdf")[0].lower() for file in os.listdir("files/")]
 
     if company_name in files_we_have:
         return "⚠️ This company is already in the list.", False
@@ -43,7 +43,7 @@ def download_file_with_url(company_name, url):
     try:
         r = requests.get(url)
 
-        with open(f"files/DEU/{company_name}.pdf", "wb") as f:
+        with open(f"files/{company_name}.pdf", "wb") as f:
             f.write(r.content)
             
     except Exception:
@@ -52,7 +52,7 @@ def download_file_with_url(company_name, url):
     return f'Download Successful ✅\n\nYou can now select {company_name} in the list.', True
 
 def get_text_from_pdf(filename, start_page, end_page):
-    pdf_file = fitz.open(f"files/DEU/{filename}")
+    pdf_file = fitz.open(f"files/{filename}")
     
     # GET A LOWERCASE TEXT VARIABLE WITH PAGES CONTENT
     text = ""
@@ -64,14 +64,14 @@ def get_text_from_pdf(filename, start_page, end_page):
 
 
 def get_pdf_pages_number(filename):
-    pdf_file = fitz.open(f"files/DEU/{filename}")
+    pdf_file = fitz.open(f"files/{filename}")
     for count, _ in enumerate(pdf_file):
         pass
     
     return count
 
 
-def load_model_and_stopwords(model='fr_core_news_md'):
+def load_model_and_stopwords(model='fr_core_news_sm'):
     
     nlp = spacy.load(model)
     

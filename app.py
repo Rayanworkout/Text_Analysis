@@ -13,14 +13,11 @@ from streamlit import components
 
 from utils import *
 
-# TODO AFFINN
 
 # SETTING PAGE CONFIG AND THEME
 
-favicon = Image.open("files/favicon.webp")
-
 st.set_page_config(
-    layout="wide", page_icon=favicon, page_title="Topic Modeling App"
+    layout="wide", page_title="Topic Modeling App"
 )
 
 hide_default_format = """
@@ -58,7 +55,7 @@ def get_parameters(choices=["full_analysis_choice"]):
     # ASKING FOR UNWANTED WORDS
     user_unwanted_words = st.text_input("🗣 What words must be ignored in the analysis ? Put a comma between each word",
                             max_chars=1000,
-                            placeholder="Apple, Louis Vuitton, Acquisition ...")
+                            placeholder="Exemple, Manger, Acquisition ...")
     if user_unwanted_words:
         parameters["user_unwanted_words"] = user_unwanted_words
     else:
@@ -142,7 +139,7 @@ def run_analysis(text):
     
     language = st.selectbox("🌐 **Select the language of the data**", ["🇫🇷", "🇬🇧 / 🇺🇸"])
             
-    model = "fr_core_news_md" if language == "🇫🇷" else "en_core_web_sm"
+    model = "fr_core_news_sm" if language == "🇫🇷" else "en_core_web_sm"
     lang = "fr" if language == "🇫🇷" else "en"
     
     user_choices = []
@@ -329,17 +326,17 @@ with open("README.md", "r") as readme:
 st.sidebar.markdown(readme_text, unsafe_allow_html=True)
 
 
-data_choice = st.selectbox("What do you want to analyze ?", ["📁 Local Universal Registration Document",
+data_choice = st.selectbox("What do you want to analyze ?", ["📁 Local Doc",
                                                              "🌐 PDF Document with URL",
                                                              "📝 Sample text"])
 
-if data_choice == "📁 Local Universal Registration Document":
-    available_files = [file.split(".")[0] for file in os.listdir("files/DEU") if file.endswith(".pdf")]
+if data_choice == "📁 Local Doc":
+    available_files = [file.split(".")[0] for file in os.listdir("files/") if file.endswith(".pdf")]
 
     if available_files:
         local_file_choice = st.selectbox("**Select a company to analyze**", available_files, index=0)
         
-        with open(f"files/DEU/{local_file_choice}.pdf", "rb") as pdf_file:
+        with open(f"files/{local_file_choice}.pdf", "rb") as pdf_file:
             PDFbyte = pdf_file.read()
         
         
@@ -361,7 +358,7 @@ if data_choice == "📁 Local Universal Registration Document":
             pages_slider = st.slider("📄 Pages to Analyze",
                                 min_value=1,
                                 max_value=get_pdf_pages_number(f"{local_file_choice}.pdf"),
-                                value=(10, 50))
+                                value=(1, 10))
             
             text = get_text_from_pdf(f"{local_file_choice}.pdf", pages_slider[0], pages_slider[1])
             run_analysis(text)

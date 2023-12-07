@@ -7,6 +7,14 @@ and apply some basic Topic Modeling to it. The model extracts keywords, create c
 
 ## TLDR ; select a file in the list, its language and click on "START" !
 
+### You can install it locally by cloning the repository and running the following command in your terminal
+
+```bash
+make install
+
+make run
+``` 
+
 -------------------------------------------
 
 ## ⚙️ Feel free to run multiple analysis with different parameters in order to get better results ⚖️
